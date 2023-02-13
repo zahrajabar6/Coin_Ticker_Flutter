@@ -11,7 +11,16 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
   String selectedCurrency = 'AUD';
+  Map<String, String> coinValues = {};
+  bool isWaiting = false;
 
   List<Text> getPickerItems() {
     List<Text> items = [];
@@ -19,6 +28,19 @@ class _PriceScreenState extends State<PriceScreen> {
       items.add(Text(currency));
     }
     return items;
+  }
+
+  void getData() async {
+    isWaiting = true;
+    try {
+      var data = await CoinData().getCoinData(selectedCurrency);
+      isWaiting = false;
+      setState(() {
+        coinValues = data;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -36,17 +58,17 @@ class _PriceScreenState extends State<PriceScreen> {
               CryptoCard(
                 cryptoCurrency: 'BTC',
                 selectedCurrency: selectedCurrency,
-                value: '?',
+                value: isWaiting ? '?' : coinValues['BTC'],
               ),
               CryptoCard(
-                cryptoCurrency: 'BTC',
+                cryptoCurrency: 'ETH',
                 selectedCurrency: selectedCurrency,
-                value: '?',
+                value: isWaiting ? '?' : coinValues['ETH'],
               ),
               CryptoCard(
-                cryptoCurrency: 'BTC',
+                cryptoCurrency: 'LTC',
                 selectedCurrency: selectedCurrency,
-                value: '?',
+                value: isWaiting ? '?' : coinValues['LTC'],
               ),
             ],
           ),
@@ -58,7 +80,7 @@ class _PriceScreenState extends State<PriceScreen> {
                 onSelectedItemChanged: (int selectedIndex) {
                   setState(() {
                     selectedCurrency = currenciesList[selectedIndex];
-                    //getData();
+                    getData();
                   });
                 },
                 children: getPickerItems(),
